@@ -7,8 +7,8 @@ import UserModel from "./UserModel";
 import { IOrder, IOrderNew } from "../types/models/IOrder";
 
 @Table({
-    tableName: 'OrderModel',
-    modelName: 'Orders',
+    modelName: 'OrderModel',
+    tableName: 'Orders',
     timestamps: true,
 })
 

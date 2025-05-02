@@ -6,8 +6,8 @@ import ProductModel from "./ProductModel";
 import { IOrderItem, IOrderItemNew } from "../types/models/IOrderItem";
 
 @Table({
-    tableName: 'OrderItemModel',
-    modelName: 'OrderItems',
+    modelName: 'OrderItemModel',
+    tableName: 'OrderItems',
     timestamps: true,
 })
 
