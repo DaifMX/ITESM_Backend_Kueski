@@ -1,40 +1,35 @@
-// import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
-// const authMiddleware = (policies: Array<String>) => {
-//     return (req: Request, res: Response, next: NextFunction) => {
-//         if (policies.includes('PUBLIC')) return next();
+import AuthService from '../services/AuthService';
 
-//         try {
-//             //Obtener token
-//             const token = req.cookies.token;
-//             if (!token) return res.sendUnauthorized('Token no recibido');
+const authService = new AuthService();
 
-//             //Verificar token
-//             const verifiedToken = authService.verifyToken(token);
-//             if (policies.includes('AUTHORIZED')) {
-//                 const queryEid = parseInt(req.query.eid as string);
-//                 const tknEid = verifiedToken.id;
+const authMiddleware = (policies: Array<String>) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (policies.includes('PUBLIC')) return next();
 
-//                 const isEidDifferent = queryEid != tknEid;
+        try {
+            //Obtener token
+            const token = req.cookies.tkn;
+            if (!token) return res.sendUnauthorized('Token no recibido');
 
-//                 if (!Number.isNaN(queryEid) && isEidDifferent && verifiedToken.role != 'ADMIN') return res.sendUnauthorized('No tienes permiso para realizar esta acción');
+            //Verificar token
+            const verifiedToken = authService.verifyToken(token);
+            if(!verifiedToken) return res.sendUnauthorized('Token invalido');
 
-//                 return next();
-//             }
+            if(!policies.includes('AUTHORIZED')) return res.sendForbidden('No tienes suficientes permisos para realizar esta acción.');
 
-//             //Verificar rol del empleado
-//             const employeeRole = verifiedToken.role;
-//             if (!policies.includes(employeeRole)) return res.sendUnauthorized('No tienes permiso para realizar esta acción');
+            //Verificar rol del empleado
+            const userRole = verifiedToken.role;
+            if (!policies.includes(userRole)) return res.sendForbidden('No tienes suficientes permisos para realizar esta acción');
 
-//             return next();
+            return next();
 
-//         } catch (error: any) {
-//             console.error(error.message);
-//             res.clearCookie;
-//             if (!hasViewPolicy) return res.sendUnauthorized('Token invalido');
-//             else return res.redirect('/login');
-//         }
-//     }
-// };
+        } catch (error: any) {
+            console.error(error.message);
+            return res.clearCookie('tkn').sendSuccess({}, 'Sesión terminada.');
+        }
+    }
+};
 
-// export default authMiddleware;
+export default authMiddleware;
