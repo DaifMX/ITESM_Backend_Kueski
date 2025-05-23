@@ -19,7 +19,7 @@ import db from './models';
 
         // ========Middlewares======== \\
         app.use(express.json()); // Habilitar respuestas de tipo json para la aplicación.
-        app.use(express.static('./src/public')); // Indicar la carptea publica de la aplicación.
+        app.use(express.static(path.join(__dirname, '../public'))); // Indicar la carptea publica de la aplicación.
         app.use(express.urlencoded({ extended: true }));
 
         app.use(cors(corsConfig)); // CORS
