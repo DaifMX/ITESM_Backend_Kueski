@@ -1,12 +1,20 @@
-import OrderItemModel from "../../models/OrderItemModel";
+import OrderProductModel from "../../models/OrderProductModel";
+import ProductModel from "../../models/ProductModel";
 import UserModel from "../../models/UserModel";
 
 export interface IOrder {
-    id: bigint;
+    id: number;
     status: string;
     total: number;
-    items: OrderItemModel[];
+    userId: number;
+    products: ProductModel[];
     user: UserModel;
 };
 
-export type IOrderNew = Omit<IOrder, 'id'>;
+export interface IOrderNew {
+    userId: number;
+};
+
+export interface IOrderNewReq {
+    products: OrderProductModel[]
+};

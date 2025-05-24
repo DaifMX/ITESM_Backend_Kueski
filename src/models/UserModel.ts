@@ -4,16 +4,24 @@ import bcrypt from 'bcrypt';
 
 import OrderModel from "./OrderModel";
 
-import { IUser } from '../types/models/IUser';
+import { IUser, IUserNew } from '../types/models/IUser';
 
 @Table({
     modelName: "UserModel",
     tableName: "Users",
     timestamps: true,
-    paranoid: true,
 })
 
-class UserModel extends Model<IUser> implements IUser {
+class UserModel extends Model<IUser, IUserNew> implements IUser {
+    @Column({
+        type: DataType.INTEGER(),
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+        unique: true,
+    })
+    declare id: number;
+
     @Column({
         type: DataType.BIGINT(),
         primaryKey: true,

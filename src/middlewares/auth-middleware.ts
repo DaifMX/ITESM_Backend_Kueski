@@ -15,10 +15,10 @@ const authMiddleware = (policies: Array<String>) => {
 
             //Verificar token
             const verifiedToken = authService.verifyToken(token);
-            if(!verifiedToken) return res.sendUnauthorized('Token invalido.');
+            if (!verifiedToken) return res.sendUnauthorized('Token invalido.');
 
-            if(!policies.includes('AUTHORIZED')) return res.sendForbidden('No tienes suficientes permisos para realizar esta acción.');
-
+            if (policies.includes('AUTHORIZED')) return next();
+            
             //Verificar rol del empleado
             const userRole = verifiedToken.role;
             if (!policies.includes(userRole)) return res.sendForbidden('No tienes suficientes permisos para realizar esta acción.');

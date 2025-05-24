@@ -1,3 +1,3 @@
-const TIMESTAMPS = ['createdAt', 'updateAt', 'deletedAt'];
+const TIMESTAMPS = ['createdAt', 'updatedAt', 'deletedAt'];
 
 export default TIMESTAMPS;

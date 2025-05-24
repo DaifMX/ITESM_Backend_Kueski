@@ -1,29 +1,29 @@
-import { Column, DataType, Model, Table, ForeignKey } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, Model, Table, ForeignKey } from "sequelize-typescript";
 
 import OrderModel from "./OrderModel";
 import ProductModel from "./ProductModel";
 
-import { IOrderItem, IOrderItemNew } from "../types/models/IOrderItem";
+import { IOrderProduct, IOrderProductNew } from "../types/models/IOrderProduct";
 
 @Table({
-    modelName: 'OrderItemModel',
-    tableName: 'OrderItems',
+    modelName: 'OrderProductModel',
+    tableName: 'OrderProducts',
     timestamps: true,
 })
 
-class OrderProductModel extends Model<IOrderItem, IOrderItemNew> implements IOrderItem {
+class OrderProductModel extends Model<IOrderProduct, IOrderProductNew> implements IOrderProduct {
     // Basic Columns
     @Column({
-        type: DataType.BIGINT,
+        type: DataType.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
         unique: true,
     })
-    declare id: bigint;
+    declare id: number;
 
     @Column({
-        type: DataType.INTEGER,
+        type: DataType.FLOAT,
         allowNull: false,
     })
     declare amount: number;
@@ -35,20 +35,25 @@ class OrderProductModel extends Model<IOrderItem, IOrderItemNew> implements IOrd
     declare subtotal: number;
 
     // Order Relationship
+    @BelongsTo(() => OrderModel)
+    declare order: OrderModel;
     @ForeignKey(() => OrderModel)
-    @Column({type: DataType.BIGINT})
-    declare orderId: bigint;
-
-    // @BelongsTo(() => OrderModel, { as: 'order' })
-    // declare order: OrderModel;
+    @Column({type: DataType.INTEGER})
+    declare orderId: number;
 
     // Product Relationship
+    @BelongsTo(() => ProductModel)
+    declare product: ProductModel;
     @ForeignKey(() => ProductModel)
-    @Column(({type: DataType.BIGINT}))
-    declare productId: bigint;
+    @Column(({type: DataType.INTEGER}))
+    declare productId: number;
 
-    // @HasOne(() => ProductModel)
-    // declare product: ProductModel;
+    // @BeforeCreate
+    // @BeforeUpdate
+    // static async calcSubtotal (entry: OrderProductModel) {
+    //     entry.subtotal = entry.amount * entry.product.price;
+    //     await entry.save();
+    // };
 }
 
 export default OrderProductModel;

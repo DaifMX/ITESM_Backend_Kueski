@@ -1,11 +1,11 @@
 export interface IProduct {
-    id: bigint;
+    id: number;
     name: string;
     price: number;
+    category: string
     description: string;
     stock: number;
-    categoryName: string
     imgPath: string;
-}
+};
 
-export type IProductNew = Omit<IProduct, 'id'>;
+export type IProductNew = Omit<IProduct, 'id' | 'imgPath'>;

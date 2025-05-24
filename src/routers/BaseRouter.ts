@@ -16,7 +16,7 @@ import InternalError from '../errors/InternalError';
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 export default abstract class BaseRouter {
-    private router;
+    private router: Router;
 
     constructor() {
         this.router = Router();
@@ -61,15 +61,12 @@ export default abstract class BaseRouter {
         // Validar que el endpoint este definido correctamente
         if (!policies || !isArrayString(policies)) throw new InternalError(`Policies not implemented. Endpoint: ${path}.`);
 
-        if (policies.includes('PUBLIC') || policies.includes('AUTHORIZED')) return true;
-
-        // Condición para evaluar si la poltiica ingresada es el nombre de algun departamento para poder limitar las endpoints dependiendo del rol del empleado.
-        const isPolicyValid = policies.some(depName => ['ADMIN', 'USER'].includes(depName.toUpperCaseFirstLetterOnly()));
-
-        // // Validar si el endpoint no incluye la politica PUBLIC, si no la tiene, entonces que dentro de las politicas incluya el nombre de uno o varios de los departamentos existentes
-        if (!isPolicyValid) throw new InternalError(`Policies ${path}invalid. Verify syntax.`);
-
-        return true;
+        if ((
+                policies.includes('PUBLIC') ||
+                policies.includes('AUTHORIZED') ||
+                policies.includes('ADMIN')
+            ) && policies.length === 1) return true;
+        throw new InternalError(`Policies for endpoint: ${path} invalid. Please validate the polcies.`);
     }
 
     private generateCustomResponses(_req: Request, res: Response, next: NextFunction) {

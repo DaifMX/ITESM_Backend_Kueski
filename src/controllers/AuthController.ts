@@ -10,7 +10,7 @@ export default class AuthController {
     public login = async (req: Request, res: Response) => {
         try {
             const { phoneNumber, password } = req.body;
-            if (phoneNumber || password) throw new RuntimeError('Creedenciales no recibidas.');
+            if (!phoneNumber || !password) throw new RuntimeError('Creedenciales no recibidas.');
             
             const tkn = await this.SERVICE.login(phoneNumber, password);
 
@@ -19,7 +19,7 @@ export default class AuthController {
                 sameSite: 'strict',
                 secure: false,
                 expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
-            });
+            }).sendSuccess({}, 'Sesión iniciada correctamente.');
 
         } catch (err: any) {
             if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
