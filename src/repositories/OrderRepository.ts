@@ -9,7 +9,7 @@ import { Transaction } from "sequelize";
 import InternalError from "../errors/InternalError";
 
 export default class OrderRepository {
-    private MODEL = OrderModel;
+    private readonly MODEL = OrderModel;
 
     private getSequelize = () => {
         if (!this.MODEL.sequelize) throw new InternalError('Error en la instancia de sequelize');
@@ -28,9 +28,21 @@ export default class OrderRepository {
         return await this.MODEL.findAll({ transaction });
     };
 
+    public getAllFromUser = async (userId: number, transaction?: Transaction): Promise<OrderModel[]> => {
+        return await this.MODEL.findAll({
+            where: { userId },
+            attributes: { exclude: ['updatedAt'] },
+            include: {
+                model: ProductModel,
+                attributes: { exclude: [...timestamps] },
+            },
+            transaction
+        });
+    };
+
     public getById = async (id: number, transaction?: Transaction): Promise<OrderModel | null> => {
         return await this.MODEL.findByPk(id, {
-            attributes: { exclude: [...timestamps, 'password'] },
+            attributes: { exclude: ['updatedAt'] },
             include: {
                 model: ProductModel,
                 attributes: { exclude: [...timestamps] },

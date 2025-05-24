@@ -4,14 +4,14 @@ import ProductRepository from "../repositories/ProductRepository";
 import OrderModel from "../models/OrderModel";
 import { IOrderNewReq } from "../types/models/IOrder";
 
-import { Transaction, ValidationError } from "sequelize";
+import { Transaction, ValidationError, DatabaseError } from "sequelize";
 import ElementNotFoundError from "../errors/ElementNotFoundError";
 import InternalError from "../errors/InternalError";
 import RuntimeError from "../errors/RuntimeError";
 
 export default class OrderService {
-    private REPOSITORY = new OrderRepository();
-    private PRODUCT_REPOSITORY = new ProductRepository();
+    private readonly REPOSITORY = new OrderRepository();
+    private readonly PRODUCT_REPOSITORY = new ProductRepository();
 
     public create = async (entry: IOrderNewReq, userId: number): Promise<OrderModel> => {
         const transaction = await this.REPOSITORY.newTransaction();
@@ -20,7 +20,6 @@ export default class OrderService {
             const order = await this.REPOSITORY.create({ userId }, transaction);
 
             for (const product of entry.products) {
-                // El total es acualizado en pushItem()
                 await this.pushItem(order.id, product.productId, product.amount, transaction);
             }
 
@@ -36,10 +35,10 @@ export default class OrderService {
         }
     };
 
-    public getAll = async (): Promise<OrderModel[]> => {
+    public getAll = async (userId?: number): Promise<OrderModel[]> => {
         try {
-            const orders = await this.REPOSITORY.getAll();
-            if (!orders) throw new ElementNotFoundError('Ordenes no encontradas en la base de datos');
+            const orders = userId ? await this.REPOSITORY.getAllFromUser(userId) : await this.REPOSITORY.getAll();
+            if (!orders || orders.length === 0) throw new ElementNotFoundError('Ordenes no encontradas en la base de datos.');
 
             return orders;
 
@@ -88,6 +87,7 @@ export default class OrderService {
             console.error(error);
             await t.rollback();
             if (error instanceof ElementNotFoundError) throw error;
+            if (error instanceof DatabaseError) throw new InternalError('Ha ocurrido un error al intentar crear tu pedidio. Intenta nuevamente más tarde.')
             throw new InternalError(error.message);
         }
     };

@@ -5,7 +5,7 @@ import AuthService from "../services/AuthService";
 import RuntimeError from '../errors/RuntimeError';
 
 export default class AuthController {
-    private SERVICE = new AuthService();
+    private readonly SERVICE = new AuthService();
 
     public login = async (req: Request, res: Response) => {
         try {

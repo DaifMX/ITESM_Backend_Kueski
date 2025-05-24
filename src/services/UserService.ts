@@ -8,7 +8,7 @@ import InternalError from "../errors/InternalError";
 import { ValidationError } from "sequelize";
 
 export default class UserService {
-    private REPOSITORY = new UserRepository();
+    private readonly REPOSITORY = new UserRepository();
 
     public create = async (entry: IUserNew): Promise<UserModel> => {
         try {

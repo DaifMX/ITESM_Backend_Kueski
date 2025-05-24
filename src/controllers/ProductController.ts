@@ -6,7 +6,7 @@ import ElementNotFoundError from '../errors/ElementNotFoundError';
 import RuntimeError from '../errors/RuntimeError';
 
 export default class ProductController {
-    private SERVICE = new ProductService();
+    private readonly SERVICE = new ProductService();
 
     public create = async (req: Request, res: Response) => {
         try {
@@ -14,7 +14,7 @@ export default class ProductController {
             if (!entry) throw new RuntimeError('Datos no recibidos.');
 
             const products = await this.SERVICE.create(entry);
-            return res.sendSuccess(products);
+            return res.sendCreated(products);
 
         } catch (error: any) {
             if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
@@ -25,12 +25,9 @@ export default class ProductController {
 
     public getAll = async (req: Request, res: Response) => {
         try {
-            const category = req.query.category;
-            
-            let products; 
-            if (!category) products = await this.SERVICE.getAll();
-            else products = await this.SERVICE.getAllByCategory(category as string);
-            
+            const category = req.query.category ? req.query.category as string : undefined;
+            const products = await this.SERVICE.getAll(category);
+
             return res.sendSuccess(products);
 
         } catch (error: any) {

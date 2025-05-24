@@ -9,9 +9,8 @@ import { TokenPayload } from '../types/interfaces/token-interfaces';
 import AuthError from '../errors/AuthError';
 
 export default class AuthService {
-    private JWT_SECRET_KEY = process.env.JWT_KEY;
-
-    private USER_SERVICE = new UserService();
+    private readonly USER_SERVICE = new UserService();
+    private readonly JWT_SECRET_KEY = process.env.JWT_KEY;
 
     // ===== Authentication ===== // 
     public login = async (phoneNumber: bigint, password: string): Promise<string> => {

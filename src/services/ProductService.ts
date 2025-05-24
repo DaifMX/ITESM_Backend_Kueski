@@ -8,7 +8,7 @@ import { ValidationError } from "sequelize";
 import InternalError from "../errors/InternalError";
 
 export default class ProductService {
-    private REPOSITORY = new ProductRepository();
+    private readonly REPOSITORY = new ProductRepository();
 
     public create = async (entry: IProductNew): Promise<ProductModel> => {
         try {
@@ -21,22 +21,9 @@ export default class ProductService {
         }
     };
 
-    public getAll = async (): Promise<ProductModel[]> => {
+    public getAll = async (category?: string): Promise<ProductModel[]> => {
         try {
-            const orders = await this.REPOSITORY.getAll();
-            if (!orders) throw new ElementNotFoundError('Productos no encontrados en la base de datos.');
-
-            return orders;
-
-        } catch (error: any) {
-            if (error instanceof ElementNotFoundError) throw error;
-            throw new InternalError(error.message);
-        }
-    };
-
-    public getAllByCategory = async (category: string): Promise<ProductModel[]> => {
-        try {
-            const orders = await this.REPOSITORY.getAllByCategory(category);
+            const orders = category ? await this.REPOSITORY.getAllByCategory(category) : await this.REPOSITORY.getAll();
             if (!orders) throw new ElementNotFoundError('Productos no encontrados en la base de datos.');
 
             return orders;

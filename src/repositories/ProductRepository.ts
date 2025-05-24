@@ -8,7 +8,7 @@ import { IProduct, IProductNew } from '../types/models/IProduct';
 import InternalError from '../errors/InternalError';
 
 export default class ProductRepository {
-    private MODEL = ProductModel;
+    private readonly MODEL = ProductModel;
 
     private getSequelize = () => {
         if (!this.MODEL.sequelize) throw new InternalError('Error en la instancia de sequelize');
@@ -27,12 +27,16 @@ export default class ProductRepository {
     };
 
     public bulkCreate = async (entries: IProductNew[], options?: BulkCreateOptions<IProduct> | undefined): Promise<ProductModel[]> => {
-        return await this.MODEL.bulkCreate(entries, {...options });
+        return await this.MODEL.bulkCreate(entries, { ...options });
     };
 
     public getAll = async (transaction?: Transaction): Promise<ProductModel[]> => {
-        return await this.MODEL.findAll({ transaction });
+        return await this.MODEL.findAll({
+            order: [['id', 'ASC']],
+            transaction
+        });
     };
+
 
     public getAllByCategory = async (category: string, transaction?: Transaction): Promise<ProductModel[]> => {
         return await this.MODEL.findAll({

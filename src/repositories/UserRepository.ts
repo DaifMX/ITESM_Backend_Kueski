@@ -9,7 +9,7 @@ import { IUserNew } from '../types/models/IUser';
 import InternalError from '../errors/InternalError';
 
 export default class UserRepository {
-    private MODEL = UserModel;
+    private readonly MODEL = UserModel;
 
     private getSequelize = () => {
         if (!this.MODEL.sequelize) throw new InternalError('Error en la instancia de sequelize');
