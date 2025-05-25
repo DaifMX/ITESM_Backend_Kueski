@@ -11,7 +11,7 @@ export default class AuthController {
         try {
             const { phoneNumber, password } = req.body;
             if (!phoneNumber || !password) throw new RuntimeError('Creedenciales no recibidas.');
-            
+
             const tkn = await this.SERVICE.login(phoneNumber, password);
 
             return res.cookie('tkn', tkn, {
