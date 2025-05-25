@@ -24,7 +24,7 @@ export default class OrderController {
 
             const parsedTkn = this.AUTH_SERVICE.parseToken(tkn);
             const userId = parsedTkn.id;
-            if (!userId) throw new RuntimeError('Token invalido.');
+            if (!userId) throw new RuntimeError('Token inváldio.');
 
             const order = await this.SERVICE.create(entry, userId);
             return res.sendCreated(order);

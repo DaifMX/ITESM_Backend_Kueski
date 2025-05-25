@@ -26,25 +26,41 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
         type: DataType.BIGINT(),
         primaryKey: true,
         allowNull: false,
-        unique: true,
+        unique: { name: 'unique_phoneNumber', msg: 'Ya existe un usuario registrado con este número telefónico.' },
+        validate: {
+            is: { args: [/^\d{10}$/], msg: 'El número telefónico debe tener exactamente 10 dígitos numéricos.' },
+            notNull: { msg: 'El número telefónico no puede ser nulo.' },
+        }
     })
     declare phoneNumber: bigint;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        validate: {
+            min: { args: [6], msg: 'La contraseña tiene que ser mínimo de 6 carácteres.' },
+            notNull: { msg: 'La contraseña no puede ser nula.' },
+        }
     })
     declare password: string;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        validate: {
+            isAlpha: { msg: 'El nombre ingresado cuenta con carácteres inválidos.' },
+            notNull: { msg: 'El nombre no puede ser nulo' },
+        }
     })
     declare firstName: string;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        validate: {
+            isAlpha: { msg: 'El apellido ingresado cuenta con carácteres inválidos.' },
+            notNull: { msg: 'El apellido no puede ser nulo' },
+        }
     })
     declare lastName: string;
 
@@ -54,6 +70,7 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
         defaultValue: 'USER',
         validate: {
             isIn: { msg: 'Solo se pertimen roles ADMIN y USER.', args: [['ADMIN', 'USER']] },
+            notNull: { msg: 'El rol no puede ser nulo' }
         }
     })
     declare role: 'ADMIN' | 'USER'; //Rol del usuario (usuario o administrador)

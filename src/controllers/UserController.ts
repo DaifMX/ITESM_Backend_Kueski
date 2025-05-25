@@ -26,7 +26,7 @@ export default class UserController {
             if (isUserAndIsLoggedIn) throw new RuntimeError('Ya haz iniciado sesión con una cuenta.');
 
             const notPushingUser = entry.role !== 'USER' || entry.role;
-            if (notPushingUser) throw new AuthError('No tienes permiso para realizar esta acción.');
+            if (notPushingUser && !isAdmin(parsedTkn)) throw new AuthError('No tienes permiso para realizar esta acción.');
 
             const user = await this.SERVICE.create(entry);
             return res.sendCreated(user);

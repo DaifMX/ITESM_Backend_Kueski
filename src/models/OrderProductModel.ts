@@ -23,37 +23,40 @@ class OrderProductModel extends Model<IOrderProduct, IOrderProductNew> implement
     declare id: number;
 
     @Column({
-        type: DataType.FLOAT,
-        allowNull: false,
-    })
-    declare amount: number;
-
-    @Column({
         type: DataType.INTEGER,
         allowNull: false,
+        validate: {
+            isFloat: { msg: 'La cantidad tiene que ser un valor númerico de punto flotante.' },
+            min: { args: [1], msg: '' },
+            notNull: { msg: 'La cantidad no puede ser nula.' }
+        }
     })
-    declare subtotal: number;
+    declare amount: number; // CANTIDAD A COMPRAR DE X PRODUCTO
+
+    @Column({
+        type: DataType.FLOAT,
+        allowNull: false,
+        validate: {
+            isFloat: { msg: 'El subtotal tiene que ser un valor númerico de punto flotante.' },
+            min: { args: [1], msg: '' },
+            notNull: { msg: 'La cantidad no puede ser nula.' },
+        }
+    })
+    declare subtotal: number; // SUBTOTAL DE LA ORDEN
 
     // Order Relationship
     @BelongsTo(() => OrderModel)
     declare order: OrderModel;
     @ForeignKey(() => OrderModel)
-    @Column({type: DataType.INTEGER})
+    @Column({ type: DataType.INTEGER })
     declare orderId: number;
 
     // Product Relationship
     @BelongsTo(() => ProductModel)
     declare product: ProductModel;
     @ForeignKey(() => ProductModel)
-    @Column(({type: DataType.INTEGER}))
+    @Column(({ type: DataType.INTEGER }))
     declare productId: number;
-
-    // @BeforeCreate
-    // @BeforeUpdate
-    // static async calcSubtotal (entry: OrderProductModel) {
-    //     entry.subtotal = entry.amount * entry.product.price;
-    //     await entry.save();
-    // };
 }
 
 export default OrderProductModel;

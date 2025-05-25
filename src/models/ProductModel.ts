@@ -1,4 +1,4 @@
-import { AfterCreate, Table, Model, Column, DataType, BelongsToMany} from 'sequelize-typescript';
+import { AfterCreate, Table, Model, Column, DataType, BelongsToMany } from 'sequelize-typescript';
 
 import OrderModel from './OrderModel';
 import OrderProductModel from './OrderProductModel';
@@ -24,13 +24,20 @@ class ProductModel extends Model<IProduct, IProductNew> implements IProduct {
     @Column({
         type: DataType.STRING,
         allowNull: false,
-        unique: true,
+        unique: { name: 'unique_name', msg: 'Ya existe un producto registrado con este nombre.' },
+        validate: {
+            notNull: { msg: 'El nombre del producto no puede ser nulo.' }
+        }
     })
     declare name: string;
 
     @Column({
         type: DataType.FLOAT(),
         allowNull: false,
+        validate: {
+            isFloat: { msg: 'El precio del producto tiene que ser un valor númerico de punto flotante.' },
+            notNull: { msg: 'El precio del producto no puede ser nulo.' }
+        }
     })
     declare price: number;
 
@@ -46,18 +53,30 @@ class ProductModel extends Model<IProduct, IProductNew> implements IProduct {
             'suspension'
         ),
         allowNull: false,
+        validate: {
+            isIn: { args: [['cargadores', 'escapes', 'filtros', 'frenos', 'interiores', 'exteriores', 'rines', 'suspension']], msg: 'Categoría invalida.' },
+            notNull: { msg: 'La categoría no puede ser nula.' },
+        },
     })
     declare category: string;
 
     @Column({
         type: DataType.STRING,
         allowNull: false,
+        validate: {
+            notNull: { msg: 'La descripción no puede ser nula.' }
+        }
     })
     declare description: string;
 
     @Column({
         type: DataType.INTEGER,
         allowNull: false,
+        validate: {
+            isInt: { msg: 'El stock tiene que ser un valor númerico entero.' },
+            min: { args: [0], msg: 'El stock no puede ser menor a 0' },
+            notNull: { msg: 'El stock no puede ser nulo.' },
+        }
     })
     declare stock: number;
 

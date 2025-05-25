@@ -15,7 +15,7 @@ const authMiddleware = (policies: Array<String>) => {
 
             //Verificar token
             const verifiedToken = authService.verifyToken(token);
-            if (!verifiedToken) return res.sendUnauthorized('Token invalido.');
+            if (!verifiedToken) return res.sendUnauthorized('Token inváldio.');
 
             if (policies.includes('AUTHORIZED')) return next();
             

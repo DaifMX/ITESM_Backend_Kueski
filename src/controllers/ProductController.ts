@@ -17,6 +17,7 @@ export default class ProductController {
             return res.sendCreated(products);
 
         } catch (error: any) {
+            console.error(error);
             if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
             if (error instanceof RuntimeError) return res.sendBadRequest(error.message);
             return res.sendInternalServerError(error.message);
