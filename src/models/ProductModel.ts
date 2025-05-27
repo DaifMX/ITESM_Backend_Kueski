@@ -93,7 +93,7 @@ class ProductModel extends Model<IProduct, IProductNew> implements IProduct {
 
     @AfterCreate
     static async updateImgPath(product: ProductModel) {
-        product.imgPath = `/products/${product.name}.webp`;
+        product.imgPath = `/public/products/${product.name}.webp`;
         await product.save();
     };
 }

@@ -15,9 +15,9 @@ export default class AuthController {
             const tkn = await this.SERVICE.login(phoneNumber, password);
 
             return res.cookie('tkn', tkn, {
-                httpOnly: false,
+                httpOnly: true,
                 sameSite: 'strict',
-                secure: false,
+                secure: true,
                 expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
             }).sendSuccess({}, 'Sesión iniciada correctamente.');
 
