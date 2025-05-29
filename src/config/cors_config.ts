@@ -2,7 +2,7 @@ import RuntimeError from "../errors/RuntimeError";
 
 const allowedOrigins = [
     "http://localhost:3030",
-    "http://daif-201.ddns.me:3030",
+    "https://daif-201.ddns.me:3030",
     "http://100.97.198.82:3030"
 ];
 
