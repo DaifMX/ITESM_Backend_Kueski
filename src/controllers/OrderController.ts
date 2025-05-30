@@ -45,7 +45,7 @@ export default class OrderController {
                     await this.SERVICE.getAll(userId) :
                     await this.SERVICE.getAll(parsedTkn.id);
 
-            return res.sendAccepted(orders);
+            return res.sendSuccess(orders);
 
         } catch (err: any) {
             if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);

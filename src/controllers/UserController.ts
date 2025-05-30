@@ -41,7 +41,7 @@ export default class UserController {
     public getAll = async (_req: Request, res: Response) => {
         try {
             const users = await this.SERVICE.getAll();
-            return res.sendAccepted(users);
+            return res.sendSuccess(users);
 
         } catch (error: any) {
             if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
