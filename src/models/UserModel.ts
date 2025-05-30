@@ -48,7 +48,10 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
         type: DataType.STRING,
         allowNull: false,
         validate: {
-            isAlpha: { msg: 'El nombre ingresado cuenta con carácteres inválidos.' },
+            is: {
+                args: /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/,
+                msg: 'El nombre ingresado cuenta con carácteres inválidos.'
+            },
             notNull: { msg: 'El nombre no puede ser nulo' },
         }
     })
@@ -58,7 +61,10 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
         type: DataType.STRING,
         allowNull: false,
         validate: {
-            isAlpha: { msg: 'El apellido ingresado cuenta con carácteres inválidos.' },
+            is: {
+                args: /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?: [A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/,
+                msg: 'El nombre ingresado cuenta con carácteres inválidos.'
+            },
             notNull: { msg: 'El apellido no puede ser nulo' },
         }
     })

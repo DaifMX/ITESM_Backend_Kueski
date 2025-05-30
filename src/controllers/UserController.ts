@@ -25,7 +25,7 @@ export default class UserController {
             const isUserAndIsLoggedIn = req.cookies.tkn && isUser(parsedTkn);
             if (isUserAndIsLoggedIn) throw new RuntimeError('Ya haz iniciado sesión con una cuenta.');
 
-            const notPushingUser = entry.role !== 'USER' || entry.role;
+            const notPushingUser = (!!entry.role && entry.role !== 'USER');
             if (notPushingUser && !isAdmin(parsedTkn)) throw new AuthError('No tienes permiso para realizar esta acción.');
 
             const user = await this.SERVICE.create(entry);
