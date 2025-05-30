@@ -24,7 +24,6 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
 
     @Column({
         type: DataType.BIGINT(),
-        primaryKey: true,
         allowNull: false,
         unique: { name: 'unique_phoneNumber', msg: 'Ya existe un usuario registrado con este número telefónico.' },
         validate: {
