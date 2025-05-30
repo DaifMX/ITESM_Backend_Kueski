@@ -72,21 +72,4 @@ export default class OrderController {
             return res.sendInternalServerError(err.message);
         }
     };
-
-    // public pushItem = async (req: Request, res: Response) => {
-    //     try {
-    //         const { orderId, productId, amount } = req.params;
-    //         if (!orderId) throw new RuntimeError('Id de orden no recibido.');
-    //         if (!productId) throw new RuntimeError('Id de producto no recibido');
-    //         if (!amount) throw new RuntimeError(`Cantidad de producto ${productId} no recibido`);
-
-    //         await this.SERVICE.pushItem(parseInt(orderId), parseInt(productId), parseFloat(amount));
-    //         return res.sendSuccess({}, 'Articulo agregado a orden correctamente');
-
-    //     } catch (err: any) {
-    //         if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);
-    //         if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
-    //         return res.sendInternalServerError(err.message);
-    //     }
-    // };
 }
