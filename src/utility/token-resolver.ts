@@ -14,8 +14,8 @@ export default function tokenResolver(res: Response, token: string, tokenType: T
 
     const GLOBAL_COOKIE_OPTS: CookieOptions = {
         httpOnly: false,
-        sameSite: 'strict',
-        secure: false,
+        sameSite: 'lax',
+        secure: true,
     };
 
     if (!token || !tokenType) throw new InternalError('Token o tipo de token no recibido al intentar retornar por controlador/middleware.');
