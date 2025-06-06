@@ -8,6 +8,6 @@ export default class AuthRouter extends BaseRouter {
     init() {
         this.post('/login', ['PUBLIC'], controller.login);
         this.get('/logout', ['AUTHORIZED'], controller.logout);
-        this.get('/isLoggedIn', ['PUBLIC'], controller.isLoggedIn);
+        this.get('/isLoggedIn', ['AUTHORIZED'], controller.isLoggedIn);
     };
 }

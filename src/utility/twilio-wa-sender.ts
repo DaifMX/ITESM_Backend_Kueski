@@ -11,3 +11,5 @@ const twilioSend = (message: string, phoneNumber: bigint) => {
         })
         .then((message: any) => message.sid);
 };
+
+export default twilioSend;

@@ -38,6 +38,13 @@ export default class UserRepository {
         });
     };
 
+    public getByRefreshToken = async (refreshToken: string, transaction?: Transaction): Promise<UserModel | null> => {
+        return await this.MODEL.findOne({
+            where: { refreshToken },
+            transaction
+        });
+    };
+
     public getById = async (id: number, transaction?: Transaction): Promise<UserModel | null> => {
         return await this.MODEL.findByPk(id, {
             attributes: { exclude: [...timestamps, 'password'] },

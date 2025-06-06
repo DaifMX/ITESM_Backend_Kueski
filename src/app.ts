@@ -13,6 +13,7 @@ import AuthRouter from './routers/AuthRouter';
 import OrderRouter from './routers/OrderRouter';
 import ProductRouter from './routers/ProductRouter';
 import UserRouter from './routers/UserRouter';
+import WebhookRouter from './routers/WebhookRouter';
 
 (async function main () {
     try {
@@ -40,6 +41,7 @@ import UserRouter from './routers/UserRouter';
         app.use("/api/order", new OrderRouter().getRouter());
         app.use("/api/product", new ProductRouter().getRouter());
         app.use("/api/user", new UserRouter().getRouter());
+        app.use("/api/webhook", new WebhookRouter().getRouter());
 
     } catch (error: any) {
         console.error(error);

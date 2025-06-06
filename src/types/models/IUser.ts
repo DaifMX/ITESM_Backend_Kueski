@@ -4,8 +4,9 @@ export interface IUser {
     password: string;
     firstName: string;
     lastName: string;
+    refreshToken: string | null;
     role: 'ADMIN' | 'USER';
 };
 
-export type IUserNew = Omit<IUser, 'id'>;
+export type IUserNew = Omit<IUser, 'id' | 'refreshToken'>;
 export type IUserUpdate = Partial<IUserNew>;

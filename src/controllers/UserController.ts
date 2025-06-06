@@ -16,13 +16,13 @@ export default class UserController {
 
     public create = async (req: Request, res: Response) => {
         try {
-            const tkn = req.cookies.tkn;
-            const parsedTkn = req.cookies.tkn ? this.AUTH_SERVICE.parseToken(tkn) : null;
+            const tkn = req.cookies.refreshToken;
+            const parsedTkn = req.cookies.refreshToken ? this.AUTH_SERVICE.parseToken(tkn, 'REFRESH') as TokenPayload : null;
 
             const entry = req.body;
             if (!entry) throw new RuntimeError('Datos no recibidos.');
 
-            const isUserAndIsLoggedIn = req.cookies.tkn && isUser(parsedTkn);
+            const isUserAndIsLoggedIn = req.cookies.refreshToken && isUser(parsedTkn);
             if (isUserAndIsLoggedIn) throw new RuntimeError('Ya haz iniciado sesión con una cuenta.');
 
             const notPushingUser = (!!entry.role && entry.role !== 'USER');

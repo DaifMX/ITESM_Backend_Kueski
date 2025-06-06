@@ -1,28 +1,41 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 export default class WebhookController {
+    private KUESKI_API_SECRET = process.env.KUESKI_API_SECRET;
+
     public webhook = async (req: Request, res: Response) => {
-        if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+        const entry = req.body;
+        
+        if (!entry.payment_id || !entry.order_id || !entry.amount || !entry.status || !entry.status_reason || !entry.sandbox
+        ) return res.sendBadRequest('Invalid request.');
 
-        const chunks = [];
-        for await (const chunk of req) {
-            chunks.push(chunk);
-        }
+        const nowSec = Math.floor(Date.now() / 1000);
+        const iat = nowSec;
+        const exp = nowSec + 5 * 60;
 
-        const rawBody = Buffer.concat(chunks).toString('utf8');
-        console.log('Webhook recibido:', rawBody);
+        const jti = crypto
+            .createHash('sha256')
+            .update(`${this.KUESKI_API_SECRET}:${iat}`)
+            .digest('hex');
 
-        let payload;
-        try {
-            payload = JSON.parse(rawBody);
-        } catch (err) {
-            console.error('JSON inválido:', err);
-            return res.status(400).json({ error: 'Invalid JSON' });
-        }
+        const responseJwtPayload = {
+            public_key: this.KUESKI_API_SECRET,
+            iat,
+            exp,
+            jti
+        };
 
-        const { status } = payload;
-        if (status === 'approved') return res.status(200).json({ status: 'accept' });
+        const resTkn = jwt.sign(
+            responseJwtPayload,
+            this.KUESKI_API_SECRET!,
+            { algorithm: 'HS256' }
+        );
 
-        return res.status(200).json({ status: 'ok' });
+        res.setHeader('Authorization', `Bearer ${resTkn}`);
+        res.setHeader('kueski-authorization', `Bearer ${resTkn}`);
+
+        if (entry.status === 'approved') return res.status(200).json({ status: 'accept' });
     };
 }

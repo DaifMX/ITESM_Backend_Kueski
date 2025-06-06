@@ -89,7 +89,7 @@ class ProductModel extends Model<IProduct, IProductNew> implements IProduct {
 
     // Relationship with OrderItem
     @BelongsToMany(() => OrderModel, () => OrderProductModel)
-    declare orderProduct: OrderModel[];
+    declare orders: OrderModel[];
 
     @AfterCreate
     static async updateImgPath(product: ProductModel) {

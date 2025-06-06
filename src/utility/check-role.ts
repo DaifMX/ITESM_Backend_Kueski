@@ -5,7 +5,7 @@ import { Request } from "express";
 
 const authService = new AuthService();
 
-export const getUserInfoFromReq = (req: Request): TokenPayload | null => req.cookies.tkn ? authService.parseToken(req.cookies.tkn) : null; 
+export const getUserInfoFromReq = (req: Request): TokenPayload | null => req.cookies.refreshToken ? authService.parseToken(req.cookies.refreshToken, 'REFRESH') as TokenPayload : null; 
 
 export const isUser = (value: TokenPayload | string | undefined | null): boolean => {
     if (typeof value === 'string') return value === 'USER';

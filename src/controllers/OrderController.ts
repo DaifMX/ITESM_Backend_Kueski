@@ -19,10 +19,10 @@ export default class OrderController {
             const entry = req.body;
             if (!entry) throw new RuntimeError('Datos no recibidos.');
 
-            const tkn = req.cookies.tkn;
+            const tkn = req.cookies.refreshToken;
             if (!tkn) throw new RuntimeError('Token no encontrado.');
 
-            const parsedTkn = this.AUTH_SERVICE.parseToken(tkn);
+            const parsedTkn = this.AUTH_SERVICE.parseToken(tkn, 'REFRESH') as TokenPayload;
             const userId = parsedTkn.id;
             if (!userId) throw new RuntimeError('Token inváldio.');
 
@@ -37,8 +37,8 @@ export default class OrderController {
 
     public getAll = async (req: Request, res: Response) => {
         try {
-            const tkn = req.cookies.tkn;
-            const parsedTkn = this.AUTH_SERVICE.parseToken(tkn);
+            const tkn = req.cookies.refreshToken;
+            const parsedTkn = this.AUTH_SERVICE.parseToken(tkn, 'REFRESH') as TokenPayload;
             const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
 
             const orders = parsedTkn.role === 'ADMIN' ?
@@ -67,6 +67,7 @@ export default class OrderController {
             return res.sendSuccess(order);
 
         } catch (err: any) {
+            console.error(err);
             if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);
             if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
             return res.sendInternalServerError(err.message);

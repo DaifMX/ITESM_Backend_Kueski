@@ -40,11 +40,12 @@ export default class OrderRepository {
         });
     };
 
-    public getById = async (id: number, transaction?: Transaction): Promise<OrderModel | null> => {
+    public getById = async (id: number, transaction?: Transaction) => {
         return await this.MODEL.findByPk(id, {
             attributes: { exclude: ['updatedAt'] },
             include: {
                 model: ProductModel,
+                through: { attributes: ['amount', 'subtotal'] },
                 attributes: { exclude: [...timestamps] },
                 as: 'products'
             },

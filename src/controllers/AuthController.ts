@@ -2,40 +2,60 @@ import { Response, Request } from 'express';
 
 import AuthService from "../services/AuthService";
 
-import RuntimeError from '../errors/RuntimeError';
+import tokenResolver from '../utility/token-resolver';
+
+import AuthError from '../errors/AuthError';
+import ElementNotFoundError from '../errors/ElementNotFoundError';
 
 export default class AuthController {
     private readonly SERVICE = new AuthService();
 
     public login = async (req: Request, res: Response) => {
+        const { phoneNumber, password } = req.body;
+        console.log('login called');
         try {
-            const { phoneNumber, password } = req.body;
-            if (!phoneNumber || !password) throw new RuntimeError('Creedenciales no recibidas.');
+            if (!phoneNumber || !password) throw new AuthError('Celular o contraseña no recibido/s.');
+            const { accessToken, propsToken, refreshToken } = await this.SERVICE.login(phoneNumber, password);
 
-            const tkn = await this.SERVICE.login(phoneNumber, password);
+            tokenResolver(res, accessToken, 'ACCESS');
+            tokenResolver(res, propsToken, 'PROPS');
+            tokenResolver(res, refreshToken, 'REFRESH');
 
-            return res.cookie('tkn', tkn, {
-                httpOnly: false,
-                sameSite: 'lax',
-                secure: true,
-                expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
-            }).sendSuccess({}, 'Sesión iniciada correctamente.');
+            return res.sendSuccess({}, 'Sesión inciada correctamente.');
 
         } catch (err: any) {
-            if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
+            if (err instanceof ElementNotFoundError || err instanceof AuthError) {
+                return res.sendUnauthorized(err.message);
+            }
+            return res.sendInternalServerError(err.message);
+
+        }
+    };
+
+    public logout = async (req: Request, res: Response) => {
+        try {
+            // Obtener token para obtener uuid del empleado
+            const refreshToken = req.cookies.refreshToken;
+            this.SERVICE.logout(refreshToken);
+
+            // Remover cookies con el refresh token
+            return res
+                .clearCookie('refreshToken')
+                .clearCookie('accessToken')
+                .clearCookie('propsToken')
+                .sendSuccess({}, 'Sesión terminada exitosamente.');
+
+        } catch (err: any) {
+            console.error(err);
             return res.sendInternalServerError(err.message);
         }
     };
 
-    public logout = async (_req: Request, res: Response) => {
+    public isLoggedIn = (_req: Request, res: Response) => {
         try {
-            return res.clearCookie('tkn');
-        } catch (err: any) {
-            return res.sendInternalServerError(err.message);
+            return res.sendSuccess({}, 'Logeado.');
+        } catch (err) {
+            return res.sendForbidden('No logeado.');
         }
-    };
-
-    public isLoggedIn = async (_req: Request, _res: Response) => {
-        
     };
 }

@@ -1,17 +1,86 @@
+import axios from "axios";
+import { Transaction, ValidationError, DatabaseError } from "sequelize";
+
 import OrderRepository from "../repositories/OrderRepository";
 import ProductRepository from "../repositories/ProductRepository";
+
+import twilioSend from "../utility/twilio-wa-sender";
 
 import OrderModel from "../models/OrderModel";
 import { IOrderNewReq } from "../types/models/IOrder";
 
-import { Transaction, ValidationError, DatabaseError } from "sequelize";
 import ElementNotFoundError from "../errors/ElementNotFoundError";
 import InternalError from "../errors/InternalError";
 import RuntimeError from "../errors/RuntimeError";
 
 export default class OrderService {
+    private readonly KUESKI_API_KEY = process.env.KUESKI_API_KEY;
+    private readonly KUESKI_API_BASE_URL = process.env.KUESKI_API_BASE_URL;
+    // private readonly KUESKI_API_SECRET = process.env.KUESKI_API_SECRET;
+
     private readonly REPOSITORY = new OrderRepository();
     private readonly PRODUCT_REPOSITORY = new ProductRepository();
+
+    private parseKueskiOrder = async (order: OrderModel) => {
+        const user = await order.$get('user');
+
+        const firstName = user?.firstName;
+        const lastName = user?.lastName;
+        const phoneNumber = user?.phoneNumber;
+
+        const items = order.products.map((product: any) => {
+            const amount = product.OrderProductModel.amount;
+
+            return {
+                name: product.name,
+                description: product.description,
+                quantity: amount,
+                price: product.price,
+                currency: 'MXN',
+                sku: `P0${product.id}`
+            };
+        });
+
+        const tax = Number((order.total * 0.16).toFixed(2));
+
+        const kueskiOrderBody = {
+            order_id: order.id,                                                                                                 // Our order number!
+            description: `Orden #${order.id} para ${firstName} ${lastName}. Total $${order.total}`,       // Order description show to the customer
+            amount: {
+                total: order.total,
+                currency: "MXN",
+                details: {
+                    subtotal: order.total - tax,
+                    shipping: 0,
+                    tax
+                }
+            },
+            items,
+            shipping: {
+                name: {
+                    name: firstName,
+                    last: lastName,
+                },
+                address: {
+                    address: 'Av. Gral Ramón Corona No 2514',
+                    neighborhood: "ITESM Campus Guadalajara",
+                    city: "Guadalajara",
+                    state: "Jalisco",
+                    zipcode: "45201",
+                    country: "MX"
+                },
+                phone_number: `52${phoneNumber}`,
+            },
+            callbacks: {
+                on_success: 'https://daif-201.ddns.me/success',
+                on_reject: 'https://daif-201.ddns.me/reject',
+                on_canceled: 'https://daif-201.ddns.me/canceled',
+                on_failed: 'https://daif-201.ddns.me/failed'
+            }
+        };
+
+        return { kueskiOrderBody, phoneNumber };
+    };
 
     public create = async (entry: IOrderNewReq, userId: number): Promise<OrderModel> => {
         const transaction = await this.REPOSITORY.newTransaction();
@@ -23,9 +92,32 @@ export default class OrderService {
                 await this.pushItem(order.id, product.productId, product.amount, transaction);
             }
 
-            const finalOrder = await this.REPOSITORY.getById(order.id, transaction);
+            const orderInDb = await this.REPOSITORY.getById(order.id, transaction);
+
+            const { kueskiOrderBody, phoneNumber } = await this.parseKueskiOrder(orderInDb as OrderModel);
+            console.log(kueskiOrderBody, this.KUESKI_API_KEY);
+
+            const composedUrl = `${this.KUESKI_API_BASE_URL}payments`;
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.KUESKI_API_KEY}`,
+                'kp-name': 'euqipos2-dev',
+                'kp-source': 'web',
+                'kp-version': '1.0.0',
+                'kp-trigger': 'api'
+            };
+
+            const kueskiRes = await axios.post(composedUrl, kueskiOrderBody, { headers });
+
+            let kueskiPaymentUrl;
+            if (kueskiRes.data.status === 'success') kueskiPaymentUrl = kueskiRes.data.data.callback_url;
+            
             await transaction.commit();
-            return finalOrder!;
+            console.log(kueskiRes);
+
+            twilioSend(`¡Hola, muchas gracias por realizar tu pedidio! Aquí esta tu link de pago: ${kueskiPaymentUrl}`, phoneNumber as bigint);
+
+            return orderInDb!;
 
         } catch (error: any) {
             console.error(error);

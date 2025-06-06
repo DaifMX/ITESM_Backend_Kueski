@@ -80,6 +80,12 @@ class UserModel extends Model<IUser, IUserNew> implements IUser {
     })
     declare role: 'ADMIN' | 'USER'; //Rol del usuario (usuario o administrador)
 
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+    })
+    declare refreshToken: string | null;
+
     // Relationship Order
     @HasMany(() => OrderModel)
     declare orders: OrderModel[];
