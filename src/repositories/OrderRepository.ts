@@ -4,7 +4,7 @@ import ProductModel from '../models/ProductModel'
 import timestamps from "../consts/timestamps";
 
 import { IOrderNew } from "../types/models/IOrder";
-import { Transaction } from "sequelize";
+import { Transaction, fn, literal } from "sequelize";
 
 import InternalError from "../errors/InternalError";
 import UserModel from "../models/UserModel";
@@ -60,7 +60,7 @@ export default class OrderRepository {
         });
     };
 
-    public getById = async (uuid: string, transaction?: Transaction) => {
+    public getById = async (uuid: string, transaction?: Transaction): Promise<OrderModel | null> => {
         return await this.MODEL.findByPk(uuid, {
             attributes: { exclude: ['updatedAt'] },
             include: {
@@ -70,6 +70,50 @@ export default class OrderRepository {
                 as: 'products'
             },
             transaction
+        });
+    };
+
+    public getAdminDashboardInfo = async (): Promise<OrderModel | null> => {
+        return await this.MODEL.findOne({
+            attributes: [
+                // Sum only paid orders ever
+                [
+                    fn(
+                        'SUM',
+                        literal(`CASE WHEN status = 'paid' THEN total ELSE 0 END`)
+                    ),
+                    'totalSold'
+                ],
+                // Sum only paid orders in the last 7 days
+                [
+                    fn(
+                        'SUM',
+                        literal(`
+                            CASE
+                                WHEN status = 'paid'
+                                AND "OrderModel"."createdAt" >= NOW() - INTERVAL '7 days'
+                                THEN total
+                                ELSE 0
+                            END
+                        `)
+                    ),
+                    'soldLast7Days'
+                ],
+                // Count of pending orders
+                [
+                    fn(
+                        'COUNT',
+                        literal(`
+                            CASE
+                                WHEN status = 'pending'
+                                THEN 1
+                            END
+                        `)
+                    ),
+                    'pendingOrders'
+                ],
+            ],
+            raw: true
         });
     };
 }

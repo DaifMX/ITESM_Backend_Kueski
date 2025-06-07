@@ -65,7 +65,7 @@ export default class AuthService {
 
 
     // ===== JWT ===== //
-    public verifyToken = (tkn: string, type: TokenType): TokenPayload => {
+    public verifyToken = (tkn: string, type: TokenType): TokenPayload | null => {
         try {
             const properties = this.setTokenProperties(type);
             const verified = jwt.verify(tkn, properties.secret);
@@ -75,7 +75,7 @@ export default class AuthService {
             return payload;
 
         } catch (err: any) {
-            throw new AuthError('El token no pudo ser verificado.');
+            return null;
         }
     };
 

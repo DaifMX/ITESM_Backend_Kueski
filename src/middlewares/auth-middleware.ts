@@ -56,7 +56,7 @@ const authMiddleware = (policies: Array<string>) => {
                         secure: true,
                         expires: new Date(Date.now() + PROPS_TOKEN_EXPIRATION),
                     })
-                    .cookie('accessToken', accessToken, {
+                    .cookie('accessToken', newAccessToken, {
                         httpOnly: false,
                         sameSite: 'lax',
                         secure: true,

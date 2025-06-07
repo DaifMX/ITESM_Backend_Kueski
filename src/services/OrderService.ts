@@ -236,4 +236,13 @@ export default class OrderService {
             throw new InternalError(error.message);
         }
     };
+
+    public getAdminDashboardInfo = async () => {
+        try {
+            const info = await this.REPOSITORY.getAdminDashboardInfo();
+            return info;
+        } catch (error: any) {
+            throw error;
+        }
+    };
 }

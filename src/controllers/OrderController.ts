@@ -42,8 +42,8 @@ export default class OrderController {
             const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
 
             const orders = parsedTkn.role === 'ADMIN' ?
-                    await this.SERVICE.getAll(userId) :
-                    await this.SERVICE.getAll(parsedTkn.id);
+                await this.SERVICE.getAll(userId) :
+                await this.SERVICE.getAll(parsedTkn.id);
 
             return res.sendSuccess(orders);
 
@@ -66,6 +66,20 @@ export default class OrderController {
 
             return res.sendSuccess(order);
 
+        } catch (err: any) {
+            console.error(err);
+            if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);
+            if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
+            return res.sendInternalServerError(err.message);
+        }
+    };
+
+    public getAdminDashboardInfo = async (_req: Request, res: Response) => {
+        try {
+            const info = await this.SERVICE.getAdminDashboardInfo();
+            if (!info) throw new RuntimeError('Error getting admin dashboard inforomation.');
+
+            return res.sendSuccess(info);
         } catch (err: any) {
             console.error(err);
             if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);

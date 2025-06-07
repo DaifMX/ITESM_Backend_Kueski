@@ -26,7 +26,7 @@ export default class UserRepository {
 
     public getAll = async (transaction?: Transaction): Promise<UserModel[]> => {
         return await this.MODEL.findAll({
-            attributes: { exclude: ['password'] },
+            attributes: { exclude: ['password', 'refreshToken'] },
             transaction
         });
     };
@@ -34,13 +34,6 @@ export default class UserRepository {
     public getByPhoneNumberFull = async (phoneNumber: bigint, transaction?: Transaction): Promise<UserModel | null> => {
         return await this.MODEL.findOne({
             where: { phoneNumber },
-            transaction
-        });
-    };
-
-    public getByRefreshToken = async (refreshToken: string, transaction?: Transaction): Promise<UserModel | null> => {
-        return await this.MODEL.findOne({
-            where: { refreshToken },
             transaction
         });
     };

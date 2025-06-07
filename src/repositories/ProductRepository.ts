@@ -37,7 +37,6 @@ export default class ProductRepository {
         });
     };
 
-
     public getAllByCategory = async (category: string, transaction?: Transaction): Promise<ProductModel[]> => {
         return await this.MODEL.findAll({
             where: { category },
