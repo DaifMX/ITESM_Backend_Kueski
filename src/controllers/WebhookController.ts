@@ -25,7 +25,7 @@ export default class WebhookController {
                 return res.status(200).json({ status: orderStatus });
             } catch (err: any) {
                 console.error(err);
-                return res.status(200).json({ status: 'ok' })
+                return res.status(200).json({ status: 'ok' });
             }
         }
 

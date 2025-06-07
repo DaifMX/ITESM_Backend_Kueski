@@ -215,10 +215,8 @@ export default class OrderService {
     public cancel = async (id: string): Promise<void> => {
         const t = await this.REPOSITORY.newTransaction();
         try {
-            console.log('start cancel');
             const order = await this.REPOSITORY.getById(id, t);
             if (!order) throw new ElementNotFoundError('Orden no encontrada en la base de datos.');
-            console.log('order to be canceled was found');
 
             order.products.forEach(async (p: any) => {
                 const amountCommitted = p.OrderProductModel.amount;
@@ -226,13 +224,13 @@ export default class OrderService {
                 p.stock = p.stock + amountCommitted;
                 await p.save({ transaction: t });
             });
-            console.log('Finished parsing products');
 
             order.status = 'cancelled';
             await order.save({transaction: t});
-            console.log('end cancel');
+            await t.commit();
 
         } catch (error: any) {
+            await t.rollback();
             console.error(error);
             if (error instanceof ElementNotFoundError) throw error;
             throw new InternalError(error.message);
