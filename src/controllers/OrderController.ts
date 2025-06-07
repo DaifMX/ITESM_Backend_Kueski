@@ -57,10 +57,10 @@ export default class OrderController {
         try {
             const { id: tknId, role: tknRole } = getUserInfoFromReq(req) as TokenPayload;
 
-            const { id } = req.params;
-            if (!id) throw new RuntimeError('Id no recibido.')
+            const { uuid } = req.params;
+            if (!uuid) throw new RuntimeError('Id no recibido.')
 
-            const order = await this.SERVICE.getById(parseInt(id));
+            const order = await this.SERVICE.getById(uuid);
 
             if (isUser(tknRole) && order.userId !== tknId) throw new AuthError('No tienes permiso para ver este recurso.');
 

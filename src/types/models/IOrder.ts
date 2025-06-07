@@ -3,7 +3,7 @@ import ProductModel from "../../models/ProductModel";
 import UserModel from "../../models/UserModel";
 
 export interface IOrder {
-    id: number;
+    uuid: string;
     status: string;
     total: number;
     userId: number;

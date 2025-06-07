@@ -1,4 +1,5 @@
 import { Column, DataType, Model, Table, BelongsToMany, BelongsTo, ForeignKey, } from "sequelize-typescript";
+import { UUIDV4 } from "sequelize";
 
 import OrderProductModel from "./OrderProductModel";
 import ProductModel from "./ProductModel";
@@ -14,13 +15,13 @@ import { IOrder, IOrderNew } from "../types/models/IOrder";
 
 class OrderModel extends Model<IOrder, IOrderNew> implements IOrder {
     @Column({
-        type: DataType.INTEGER,
-        autoIncrement: true,
+        type: DataType.UUID,
+        defaultValue: UUIDV4,
         primaryKey: true,
         allowNull: false,
         unique: true,
     })
-    declare id: number;
+    declare uuid: string;
 
     @Column({
         type: DataType.ENUM('pending', 'paid', 'expired', 'cancelled'),

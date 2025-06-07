@@ -49,7 +49,7 @@ class OrderProductModel extends Model<IOrderProduct, IOrderProductNew> implement
     declare order: OrderModel;
     @ForeignKey(() => OrderModel)
     @Column({ type: DataType.INTEGER })
-    declare orderId: number;
+    declare orderId: string;
 
     // Product Relationship
     @BelongsTo(() => ProductModel)

@@ -44,8 +44,8 @@ export default class OrderService {
         const tax = Number((order.total * 0.16).toFixed(2));
 
         const kueskiOrderBody = {
-            order_id: order.id,
-            description: `Orden #${order.id} para ${firstName} ${lastName}. Total $${order.total}`,
+            order_id: order.uuid,
+            description: `Orden #${order.uuid} para ${firstName} ${lastName}. Total $${order.total}`,
             amount: {
                 total: order.total,
                 currency: "MXN",
@@ -89,10 +89,10 @@ export default class OrderService {
             const order = await this.REPOSITORY.create({ userId }, transaction);
 
             for (const product of entry.products) {
-                await this.pushItem(order.id, product.productId, product.amount, transaction);
+                await this.pushItem(order.uuid, product.productId, product.amount, transaction);
             }
 
-            const orderInDb = await this.REPOSITORY.getById(order.id, transaction);
+            const orderInDb = await this.REPOSITORY.getById(order.uuid, transaction);
 
             const { kueskiOrderBody, phoneNumber } = await this.parseKueskiOrder(orderInDb as OrderModel);
 
@@ -141,10 +141,10 @@ export default class OrderService {
         }
     };
 
-    public getById = async (id: number): Promise<OrderModel> => {
+    public getById = async (uuid: string): Promise<OrderModel> => {
         try {
-            const order = await this.REPOSITORY.getById(id);
-            if (!order) throw new ElementNotFoundError(`Orden con el id ${id} no encontrado en la base de datos.`);
+            const order = await this.REPOSITORY.getById(uuid);
+            if (!order) throw new ElementNotFoundError(`Orden con el id ${uuid} no encontrado en la base de datos.`);
 
             return order;
         } catch (error: any) {
@@ -153,7 +153,7 @@ export default class OrderService {
         }
     };
 
-    public pushItem = async (orderId: number, productId: number, amount: number, t: Transaction): Promise<void> => {
+    public pushItem = async (orderId: string, productId: number, amount: number, t: Transaction): Promise<void> => {
         try {
             const order = await this.REPOSITORY.getById(orderId, t);
             if (!order) throw new ElementNotFoundError(`Orden con el id ${orderId} no encontrado en la base de datos.`);
@@ -186,7 +186,7 @@ export default class OrderService {
         }
     };
 
-    public validate = async (id: number): Promise<KueskiFinalOrderStatus> => {
+    public validate = async (id: string): Promise<KueskiFinalOrderStatus> => {
         // Resta a stock comprometido en caso de que la orden sea exitosa.
         try {
             const t = await this.REPOSITORY.newTransaction();
@@ -212,11 +212,13 @@ export default class OrderService {
         return 'accept';
     };
 
-    public cancel = async (id: number): Promise<void> => {
+    public cancel = async (id: string): Promise<void> => {
         const t = await this.REPOSITORY.newTransaction();
         try {
+            console.log('start cancel');
             const order = await this.REPOSITORY.getById(id, t);
             if (!order) throw new ElementNotFoundError('Orden no encontrada en la base de datos.');
+            console.log('order to be canceled was found');
 
             order.products.forEach(async (p: any) => {
                 const amountCommitted = p.OrderProductModel.amount;
@@ -224,11 +226,14 @@ export default class OrderService {
                 p.stock = p.stock + amountCommitted;
                 await p.save({ transaction: t });
             });
+            console.log('Finished parsing products');
 
             order.status = 'cancelled';
             await order.save({transaction: t});
+            console.log('end cancel');
 
         } catch (error: any) {
+            console.error(error);
             if (error instanceof ElementNotFoundError) throw error;
             throw new InternalError(error.message);
         }

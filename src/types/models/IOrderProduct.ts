@@ -2,7 +2,7 @@ export interface IOrderProduct {
     id: number;
     amount: number;
     subtotal: number;
-    orderId: number;  
+    orderId: string;  
     productId: number;
 };
 

@@ -60,8 +60,8 @@ export default class OrderRepository {
         });
     };
 
-    public getById = async (id: number, transaction?: Transaction) => {
-        return await this.MODEL.findByPk(id, {
+    public getById = async (uuid: string, transaction?: Transaction) => {
+        return await this.MODEL.findByPk(uuid, {
             attributes: { exclude: ['updatedAt'] },
             include: {
                 model: ProductModel,
