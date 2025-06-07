@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Transaction, ValidationError, DatabaseError } from "sequelize";
 
 import OrderRepository from "../repositories/OrderRepository";
@@ -12,11 +12,11 @@ import { IOrderNewReq } from "../types/models/IOrder";
 import ElementNotFoundError from "../errors/ElementNotFoundError";
 import InternalError from "../errors/InternalError";
 import RuntimeError from "../errors/RuntimeError";
+import { KueskiFinalOrderStatus } from "../types/kueski-types";
 
 export default class OrderService {
     private readonly KUESKI_API_KEY = process.env.KUESKI_API_KEY;
     private readonly KUESKI_API_BASE_URL = process.env.KUESKI_API_BASE_URL;
-    // private readonly KUESKI_API_SECRET = process.env.KUESKI_API_SECRET;
 
     private readonly REPOSITORY = new OrderRepository();
     private readonly PRODUCT_REPOSITORY = new ProductRepository();
@@ -44,8 +44,8 @@ export default class OrderService {
         const tax = Number((order.total * 0.16).toFixed(2));
 
         const kueskiOrderBody = {
-            order_id: order.id,                                                                                                 // Our order number!
-            description: `Orden #${order.id} para ${firstName} ${lastName}. Total $${order.total}`,       // Order description show to the customer
+            order_id: order.id,
+            description: `Orden #${order.id} para ${firstName} ${lastName}. Total $${order.total}`,
             amount: {
                 total: order.total,
                 currency: "MXN",
@@ -83,8 +83,8 @@ export default class OrderService {
     };
 
     public create = async (entry: IOrderNewReq, userId: number): Promise<OrderModel> => {
+        let kueskiRes;
         const transaction = await this.REPOSITORY.newTransaction();
-
         try {
             const order = await this.REPOSITORY.create({ userId }, transaction);
 
@@ -95,7 +95,6 @@ export default class OrderService {
             const orderInDb = await this.REPOSITORY.getById(order.id, transaction);
 
             const { kueskiOrderBody, phoneNumber } = await this.parseKueskiOrder(orderInDb as OrderModel);
-            console.log(kueskiOrderBody, this.KUESKI_API_KEY);
 
             const composedUrl = `${this.KUESKI_API_BASE_URL}payments`;
             const headers = {
@@ -106,14 +105,14 @@ export default class OrderService {
                 'kp-version': '1.0.0',
                 'kp-trigger': 'api'
             };
-
-            const kueskiRes = await axios.post(composedUrl, kueskiOrderBody, { headers });
+            kueskiRes = await axios.post(composedUrl, kueskiOrderBody, { headers });
 
             let kueskiPaymentUrl;
+
             if (kueskiRes.data.status === 'success') kueskiPaymentUrl = kueskiRes.data.data.callback_url;
-            
+            else throw new RuntimeError('Ocurrio un error al crear tu orden en Kueski.');
+
             await transaction.commit();
-            console.log(kueskiRes);
 
             twilioSend(`¡Hola, muchas gracias por realizar tu pedidio! Aquí esta tu link de pago: ${kueskiPaymentUrl}`, phoneNumber as bigint);
 
@@ -123,6 +122,8 @@ export default class OrderService {
             console.error(error);
             await transaction.rollback();
             if (error instanceof ValidationError) throw new RuntimeError(error.message);
+            if (error instanceof RuntimeError) throw error;
+            if (error instanceof AxiosError) throw new RuntimeError('Ocurrio un error al crear tu orden en Kueski.');
             throw new InternalError(error.message)
         }
     };
@@ -173,6 +174,7 @@ export default class OrderService {
             await order.save({ transaction: t });
 
             product.stock = product.stock - amount;
+            product.stockCommitted = product.stockCommitted + amount;
             await product.save({ transaction: t });
 
         } catch (error: any) {
@@ -180,6 +182,54 @@ export default class OrderService {
             await t.rollback();
             if (error instanceof ElementNotFoundError) throw error;
             if (error instanceof DatabaseError) throw new InternalError('Ha ocurrido un error al intentar crear tu pedidio. Intenta nuevamente más tarde.')
+            throw new InternalError(error.message);
+        }
+    };
+
+    public validate = async (id: number): Promise<KueskiFinalOrderStatus> => {
+        // Resta a stock comprometido en caso de que la orden sea exitosa.
+        try {
+            const t = await this.REPOSITORY.newTransaction();
+            const order = await this.REPOSITORY.getById(id, t);
+            if (!order) throw new ElementNotFoundError(`Orden id ${id} no encontrada en la base de datos.`);
+
+            order.products.forEach(async (p: any) => {
+                const amountCommitted = p.OrderProductModel.amount;
+                p.stockCommitted = p.stockCommitted - amountCommitted;
+                await p.save({ transaction: t });
+            });
+
+            order.status = 'paid';
+            await order.save({ transaction: t });
+
+            await t.commit();
+
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) throw error;
+            throw new InternalError(error.message);
+        }
+
+        return 'accept';
+    };
+
+    public cancel = async (id: number): Promise<void> => {
+        const t = await this.REPOSITORY.newTransaction();
+        try {
+            const order = await this.REPOSITORY.getById(id, t);
+            if (!order) throw new ElementNotFoundError('Orden no encontrada en la base de datos.');
+
+            order.products.forEach(async (p: any) => {
+                const amountCommitted = p.OrderProductModel.amount;
+                p.stockCommitted = p.stockCommitted - amountCommitted;
+                p.stock = p.stock + amountCommitted;
+                await p.save({ transaction: t });
+            });
+
+            order.status = 'cancelled';
+            await order.save({transaction: t});
+
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) throw error;
             throw new InternalError(error.message);
         }
     };

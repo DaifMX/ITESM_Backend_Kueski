@@ -81,6 +81,18 @@ class ProductModel extends Model<IProduct, IProductNew> implements IProduct {
     declare stock: number;
 
     @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+            isInt: { msg: 'El stock comprometido tiene que ser un valor númerico entero.' },
+            min: { args: [0], msg: 'El stock comprometido no puede ser menor a 0' },
+            notNull: { msg: 'El stock comprometido no puede ser nulo.' },
+        }
+    })
+    declare stockCommitted: number;
+
+    @Column({
         type: DataType.STRING,
         allowNull: true,
         unique: true,

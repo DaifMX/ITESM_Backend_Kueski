@@ -7,6 +7,7 @@ import { IOrderNew } from "../types/models/IOrder";
 import { Transaction } from "sequelize";
 
 import InternalError from "../errors/InternalError";
+import UserModel from "../models/UserModel";
 
 export default class OrderRepository {
     private readonly MODEL = OrderModel;
@@ -25,16 +26,35 @@ export default class OrderRepository {
     };
 
     public getAll = async (transaction?: Transaction): Promise<OrderModel[]> => {
-        return await this.MODEL.findAll({ transaction });
+        return await this.MODEL.findAll({
+            attributes: { exclude: ['userId'] },
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: ProductModel,
+                    through: { attributes: { exclude: ['orderId', 'productId', ...timestamps] } },
+                    attributes: { exclude: [...timestamps, 'stock', 'category', 'description'] },
+                    as: 'products'
+                },
+                {
+                    model: UserModel,
+                    attributes: { exclude: ['password', 'role', 'refreshToken', ...timestamps] }
+                }
+            ],
+            transaction
+        });
     };
 
     public getAllFromUser = async (userId: number, transaction?: Transaction): Promise<OrderModel[]> => {
         return await this.MODEL.findAll({
             where: { userId },
-            attributes: { exclude: ['updatedAt'] },
+            order: [['createdAt', 'DESC']],
+            attributes: { exclude: ['updatedAt', 'userId'] },
             include: {
                 model: ProductModel,
-                attributes: { exclude: [...timestamps] },
+                through: { attributes: { exclude: ['orderId', 'productId', ...timestamps] } },
+                attributes: { exclude: [...timestamps, 'stock', 'category', 'description'] },
+                as: 'products'
             },
             transaction
         });

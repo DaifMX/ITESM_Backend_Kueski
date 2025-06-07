@@ -4,7 +4,7 @@ import AuthService from '../services/AuthService';
 import UserRepository from "../repositories/UserRepository";
 
 import { TokenPayload } from "../types/interfaces/token-interfaces";
-import tokenResolver from "../utility/token-resolver";
+// import tokenResolver from "../utility/token-resolver";
 
 const authService = new AuthService();
 const USER_REPOSITORY = new UserRepository();
@@ -47,8 +47,21 @@ const authMiddleware = (policies: Array<string>) => {
                 const newAccessToken = authService.signToken(user, 'ACCESS');
                 const newPropsToken = authService.signToken(user, 'PROPS');
 
-                tokenResolver(res, accessToken, 'ACCESS');
-                tokenResolver(res, newPropsToken, 'PROPS');
+                // Devolver el nuevo access y props token
+                const ACCESS_TOKEN_EXPIRATION = 15 * 60 * 1000; // 15 minutes
+                const PROPS_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours
+                res.cookie('propsToken', newPropsToken, {
+                        httpOnly: false,
+                        sameSite: 'lax',
+                        secure: true,
+                        expires: new Date(Date.now() + PROPS_TOKEN_EXPIRATION),
+                    })
+                    .cookie('accessToken', accessToken, {
+                        httpOnly: false,
+                        sameSite: 'lax',
+                        secure: true,
+                        expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
+                    });
 
                 accessTknVerified = authService.parseToken(newAccessToken, 'ACCESS') as TokenPayload;
             }
