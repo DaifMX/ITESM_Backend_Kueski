@@ -46,8 +46,16 @@ export default class ProductRepository {
 
     public getById = async (id: number, transaction?: Transaction): Promise<ProductModel | null> => {
         return await this.MODEL.findByPk(id, {
-            attributes: { exclude: [...timestamps, 'password'] },
-            transaction
+            attributes: { exclude: [...timestamps] },
+            transaction,
+        });
+    };
+
+    public getByName = async (name: string, transaction?: Transaction, paranoid?: boolean): Promise<ProductModel | null> => {
+        return await this.MODEL.findOne({
+            where: { name },
+            transaction,
+            paranoid
         });
     };
 }

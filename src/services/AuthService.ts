@@ -20,7 +20,7 @@ export default class AuthService {
     public login = async (phoneNumber: bigint, password: string): Promise<LoginResponse> => {
         const transaction = await this.USER_SERVICE.newTransaction();
         try {
-            const user = await this.USER_SERVICE.getByPhoneNumberFull(phoneNumber, transaction);
+            const user = await this.USER_SERVICE.getByPhoneNumber(phoneNumber, transaction);
             if (!user) throw new AuthError('Creedenciales incorrectas. Intente nuevamente.');
 
             const isValid = await user?.isPasswordValid(password);

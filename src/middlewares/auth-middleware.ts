@@ -26,19 +26,19 @@ const authMiddleware = (policies: Array<string>) => {
 
             // Verificar access token del empleado
             let accessTknVerified = authService.verifyToken(accessToken, 'ACCESS') as TokenPayload;
+            
+            // Buscar refresh token en las cookies
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) return res.sendUnauthorized('Token no recibido.');
 
+            // Buscar empleado con el refresh token guardado en las cookies
+            const user = await USER_REPOSITORY.getById((authService.parseToken(refreshToken, 'REFRESH') as TokenPayload).id);
+
+            // Tirar error si el token en las cookies es diferente del que esta guardado en la base de datos
+            if (!user || user.refreshToken !== refreshToken) return tokenResponse('Token inválido. Inicie sesión nuevamente.')(req, res);
+            
             // Operar refresh token si access token es invalido
             if (accessTknVerified == null) {
-                // Buscar refresh token en las cookies
-                const refreshToken = req.cookies.refreshToken;
-                if (!refreshToken) return res.sendUnauthorized('Token no recibido.');
-
-                // Buscar empleado con el refresh token guardado en las cookies
-                const user = await USER_REPOSITORY.getById((authService.parseToken(refreshToken, 'REFRESH') as TokenPayload).id);
-
-                // Tirar error si el token en las cookies es diferente del que esta guardado en la base de datos
-                if (!user || user.refreshToken !== refreshToken) return tokenResponse('Token inválido. Inicie sesión nuevamente.')(req, res);
-
                 // Verificar refresh token
                 const refreshTknVerified = authService.verifyToken(refreshToken, 'REFRESH');
                 if (refreshTknVerified == null) return tokenResponse('Token expirado. Inicie sesión nuevamente.')(req, res);

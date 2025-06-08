@@ -9,6 +9,7 @@ import { IProduct, IProductNew } from '../types/models/IProduct';
     modelName: 'ProductModel',
     tableName: 'Products',
     timestamps: true,
+    paranoid: true,
 })
 
 class ProductModel extends Model<IProduct, IProductNew> implements IProduct {

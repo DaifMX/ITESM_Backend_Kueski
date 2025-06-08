@@ -15,11 +15,11 @@ export default class UserController {
     private readonly AUTH_SERVICE = new AuthService();
 
     public create = async (req: Request, res: Response) => {
+        const entry = req.body;
         try {
             const tkn = req.cookies.refreshToken;
             const parsedTkn = req.cookies.refreshToken ? this.AUTH_SERVICE.parseToken(tkn, 'REFRESH') as TokenPayload : null;
 
-            const entry = req.body;
             if (!entry) throw new RuntimeError('Datos no recibidos.');
 
             const isUserAndIsLoggedIn = req.cookies.refreshToken && isUser(parsedTkn);
@@ -54,7 +54,7 @@ export default class UserController {
             const { id: requesterId, role: requesterRole } = getUserInfoFromReq(req) as TokenPayload;
 
             const { id: requestedId } = req.params;
-            if(!requestedId) throw new RuntimeError('Id no recibida');
+            if (!requestedId) throw new RuntimeError('Id no recibida');
 
             const user = !isAdmin(requesterRole) ? await this.SERVICE.getById(requesterId) : await this.SERVICE.getById(parseInt(requestedId));
 
@@ -66,4 +66,20 @@ export default class UserController {
             return res.sendInternalServerError(error.message);
         }
     };
+
+    public remove = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            if (!id) throw new RuntimeError('Id no recibido.');
+
+            const isDeleted = await this.SERVICE.remove(parseInt(id));
+            return res.sendSuccess({ isDeleted: isDeleted }, 'Usuario removido correctamente.');
+
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
+            if (error instanceof RuntimeError) return res.sendBadRequest(error.message);
+            return res.sendInternalServerError(error.message);
+        }
+    };
+
 }

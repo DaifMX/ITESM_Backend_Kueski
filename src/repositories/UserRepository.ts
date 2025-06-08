@@ -31,17 +31,18 @@ export default class UserRepository {
         });
     };
 
-    public getByPhoneNumberFull = async (phoneNumber: bigint, transaction?: Transaction): Promise<UserModel | null> => {
+    public getByPhoneNumber = async (phoneNumber: bigint, transaction?: Transaction, paranoid?: boolean): Promise<UserModel | null> => {
         return await this.MODEL.findOne({
             where: { phoneNumber },
-            transaction
+            transaction,
+            paranoid
         });
     };
 
     public getById = async (id: number, transaction?: Transaction): Promise<UserModel | null> => {
         return await this.MODEL.findByPk(id, {
             attributes: { exclude: [...timestamps, 'password'] },
-            transaction
+            transaction,
         });
     };
 }

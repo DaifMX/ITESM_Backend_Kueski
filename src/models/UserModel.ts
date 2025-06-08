@@ -10,6 +10,7 @@ import { IUser, IUserNew } from '../types/models/IUser';
     modelName: "UserModel",
     tableName: "Users",
     timestamps: true,
+    paranoid: true,
 })
 
 class UserModel extends Model<IUser, IUserNew> implements IUser {
