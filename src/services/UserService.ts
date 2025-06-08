@@ -74,7 +74,7 @@ export default class UserService {
             const user = await this.REPOSITORY.getById(id, transaction);
             if (!user) throw new ElementNotFoundError(`Usuario con el id ${id} no encontrado en la base de datos.`);
 
-            const hasPendingOrders = user.orders.some((o) => o.status === 'pending');
+            const hasPendingOrders = user.orders?.some((o) => o.status === 'pending');
             if (hasPendingOrders) throw new RuntimeError('El usuario no pudo ser eliminado ya que tiene ordenes activas. Cancele sus ordenes e intente nuevamente.');
 
             await user.destroy({ transaction });

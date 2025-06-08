@@ -53,6 +53,17 @@ export default class ProductController {
         }
     };
 
+    public uploadImg = async (req: Request, res: Response) => {
+        try {
+            console.log(req.file);
+            return res.sendSuccess({}, req.file?.filename);
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
+            if (error instanceof RuntimeError) return res.sendBadRequest(error.message);
+            return res.sendInternalServerError(error.message);
+        }
+    };
+
     public remove = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
