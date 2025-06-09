@@ -72,10 +72,10 @@ export default class OrderService {
                 phone_number: `52${phoneNumber}`,
             },
             callbacks: {
-                on_success: 'https://daif-201.ddns.me/success',
-                on_reject: 'https://daif-201.ddns.me/reject',
-                on_canceled: 'https://daif-201.ddns.me/canceled',
-                on_failed: 'https://daif-201.ddns.me/failed'
+                on_success: `https://daif-201.ddns.me/success?orderId=${order.uuid}`,
+                on_reject: `https://daif-201.ddns.me/reject?orderId=${order.uuid}`,
+                on_canceled: `https://daif-201.ddns.me/canceled?orderId=${order.uuid}`,
+                on_failed: `https://daif-201.ddns.me/failed?orderId=${order.uuid}`
             }
         };
 
