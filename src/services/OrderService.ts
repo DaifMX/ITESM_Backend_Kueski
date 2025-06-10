@@ -108,14 +108,17 @@ export default class OrderService {
             };
             kueskiRes = await axios.post(composedUrl, kueskiOrderBody, { headers });
 
-            let kueskiPaymentUrl;
+            let kueskiOrderUrl;
 
-            if (kueskiRes.data.status === 'success') kueskiPaymentUrl = kueskiRes.data.data.callback_url;
+            if (kueskiRes.data.status === 'success') kueskiOrderUrl = kueskiRes.data.data.callback_url;
             else throw new RuntimeError('Ocurrio un error al crear tu orden en Kueski.');
+
+            orderInDb!.kueskiOrderUrl = kueskiOrderUrl;
+            orderInDb!.save({ transaction });
 
             await transaction.commit();
 
-            twilioSend(`¡Hola, muchas gracias por realizar tu pedidio! Aquí esta tu link de pago: ${kueskiPaymentUrl}`, phoneNumber as bigint);
+            twilioSend(`¡Hola, muchas gracias por realizar tu pedidio! Aquí esta tu link de pago de Kueski Pay: ${kueskiOrderUrl}`, phoneNumber as bigint);
 
             return orderInDb!;
 
@@ -124,7 +127,7 @@ export default class OrderService {
             await transaction.rollback();
             if (error instanceof ValidationError) throw new RuntimeError(error.message);
             if (error instanceof RuntimeError) throw error;
-            if (error instanceof AxiosError) throw new RuntimeError('Ocurrio un error al crear tu orden en Kueski.');
+            if (error instanceof AxiosError) throw new RuntimeError('Ocurrio un error al crear tu link de pago en Kueski Pay.');
             throw new InternalError(error.message)
         }
     };
@@ -218,7 +221,7 @@ export default class OrderService {
         try {
             const order = await this.REPOSITORY.getById(id, t);
             if (!order) throw new ElementNotFoundError('Orden no encontrada en la base de datos.');
-            
+
             if (userId && userId !== order.userId) throw new AuthError('No puedes modificar esta orden.');
 
             order.products.forEach(async (p: any) => {
@@ -229,7 +232,7 @@ export default class OrderService {
             });
 
             order.status = 'cancelled';
-            await order.save({transaction: t});
+            await order.save({ transaction: t });
             await t.commit();
 
         } catch (error: any) {

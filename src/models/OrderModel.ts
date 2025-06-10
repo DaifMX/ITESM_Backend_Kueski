@@ -45,6 +45,15 @@ class OrderModel extends Model<IOrder, IOrderNew> implements IOrder {
     })
     declare total: number;
 
+    @Column({
+        type: DataType.STRING(),
+        allowNull: true,
+        validate: {
+            isUrl: { msg: 'Valor invalido en URL de Kueski Pay de la orden.' }
+        },
+    })
+    declare kueskiOrderUrl: string;
+
     // Relationship User
     @Column({
         type: DataType.INTEGER,

@@ -6,6 +6,7 @@ export interface IOrder {
     uuid: string;
     status: string;
     total: number;
+    kueskiOrderUrl: string;
     userId: number;
     products: ProductModel[];
     user: UserModel;
