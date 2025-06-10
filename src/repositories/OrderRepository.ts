@@ -38,7 +38,8 @@ export default class OrderRepository {
                 },
                 {
                     model: UserModel,
-                    attributes: { exclude: ['password', 'role', 'refreshToken', ...timestamps] }
+                    attributes: { exclude: ['password', 'role', 'refreshToken', ...timestamps] },
+                    paranoid: false,
                 }
             ],
             transaction
