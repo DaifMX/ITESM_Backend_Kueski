@@ -13,6 +13,7 @@ import ElementNotFoundError from "../errors/ElementNotFoundError";
 import InternalError from "../errors/InternalError";
 import RuntimeError from "../errors/RuntimeError";
 import { KueskiFinalOrderStatus } from "../types/kueski-types";
+import AuthError from "../errors/AuthError";
 
 export default class OrderService {
     private readonly KUESKI_API_KEY = process.env.KUESKI_API_KEY;
@@ -212,11 +213,13 @@ export default class OrderService {
         return 'accept';
     };
 
-    public cancel = async (id: string): Promise<void> => {
+    public cancel = async (id: string, userId?: number): Promise<void> => {
         const t = await this.REPOSITORY.newTransaction();
         try {
             const order = await this.REPOSITORY.getById(id, t);
             if (!order) throw new ElementNotFoundError('Orden no encontrada en la base de datos.');
+            
+            if (userId && userId !== order.userId) throw new AuthError('No puedes modificar esta orden.');
 
             order.products.forEach(async (p: any) => {
                 const amountCommitted = p.OrderProductModel.amount;

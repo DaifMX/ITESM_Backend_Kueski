@@ -13,8 +13,8 @@ export default class ProductService {
 
     public create = async (entry: IProductNew): Promise<ProductModel> => {
         try {
-            const user = await this.REPOSITORY.create(entry);
-            return user;
+            const product = await this.REPOSITORY.create(entry);
+            return product;
 
         } catch (error: any) {
             if (error instanceof UniqueConstraintError) {
@@ -32,10 +32,10 @@ export default class ProductService {
 
     public getAll = async (category?: string): Promise<ProductModel[]> => {
         try {
-            const orders = category ? await this.REPOSITORY.getAllByCategory(category) : await this.REPOSITORY.getAll();
-            if (!orders) throw new ElementNotFoundError('Productos no encontrados en la base de datos.');
+            const products = category ? await this.REPOSITORY.getAllByCategory(category) : await this.REPOSITORY.getAll();
+            if (!products) throw new ElementNotFoundError('Productos no encontrados en la base de datos.');
 
-            return orders;
+            return products;
 
         } catch (error: any) {
             if (error instanceof ElementNotFoundError) throw error;
@@ -45,10 +45,24 @@ export default class ProductService {
 
     public getById = async (id: number): Promise<ProductModel> => {
         try {
-            const order = await this.REPOSITORY.getById(id);
-            if (!order) throw new ElementNotFoundError(`Producto con el id ${id} no encontrado en la base de datos.`);
+            const product = await this.REPOSITORY.getById(id);
+            if (!product) throw new ElementNotFoundError(`Producto con el id ${id} no encontrado en la base de datos.`);
 
-            return order;
+            return product;
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) throw error;
+            throw new InternalError(error.message);
+        }
+    };
+
+    public updateStock = async (id: number, stock: number): Promise<number> => {
+        try {
+            const product = await this.REPOSITORY.getById(id);
+            if (!product) throw new ElementNotFoundError(`Producto con el id ${id} no encontrado en la base de datos.`);
+
+            product.stock = stock;
+            await product.save();
+            return product.stock;
         } catch (error: any) {
             if (error instanceof ElementNotFoundError) throw error;
             throw new InternalError(error.message);

@@ -10,7 +10,8 @@ export default class ProductRouter extends BaseRouter {
         this.get('/getAll', ['PUBLIC'], controller.getAll);
         this.get('/getById/:id', ['PUBLIC'], controller.getById);
         this.post('/create', ['ADMIN'], controller.create);
-        this.patch('/uploadImg/:id', ['ADMIN'], uploadProductImage.single('image'), controller.uploadImg),
+        this.patch('/uploadImg/:id', ['ADMIN'], uploadProductImage.single('image'), controller.uploadImg);
+        this.patch('/updateStock/:id', ['ADMIN'], controller.updateStock);
         this.delete('/remove/:id', ['ADMIN'], controller.remove);
     };
 }

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import AuthService from '../services/AuthService';
 import OrderService from "../services/OrderService";
 
-import { getUserInfoFromReq, isUser } from '../utility/check-role';
+import { getUserInfoFromReq, isAdmin, isUser } from '../utility/check-role';
 
 import ElementNotFoundError from "../errors/ElementNotFoundError";
 import RuntimeError from '../errors/RuntimeError';
@@ -87,4 +87,25 @@ export default class OrderController {
             return res.sendInternalServerError(err.message);
         }
     };
+
+    public cancel = async (req: Request, res: Response) => {
+        try {
+            const { uuid } = req.params;
+            if (!uuid) throw new RuntimeError('UUID de orden no recibido.');
+
+            const refTkn = req.cookies.refreshToken
+            const parsedTkn = new AuthService().parseToken(refTkn, 'REFRESH') as TokenPayload;
+
+            if (isAdmin(parsedTkn.role)) await this.SERVICE.cancel(uuid);
+            else await this.SERVICE.cancel(uuid, parsedTkn.id);
+
+            return res.sendSuccess({}, `Orden #${uuid} cancelada correctamente.`);
+        } catch (err: any) {
+            console.error(err);
+            if (err instanceof ElementNotFoundError) return res.sendNotFound(err.message);
+            if (err instanceof AuthError) return res.sendForbidden(err.message);
+            if (err instanceof RuntimeError) return res.sendBadRequest(err.message);
+            return res.sendInternalServerError(err.message);
+        }
+    }
 }

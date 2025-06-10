@@ -10,6 +10,6 @@ export default class OrderRouter extends BaseRouter {
         this.get('/getById/:uuid', ['AUTHORIZED'], controller.getById);
         this.get('/getAdminDashboardInfo', ['ADMIN'], controller.getAdminDashboardInfo);
         this.post('/create', ['AUTHORIZED'], controller.create);
-        // this.patch('/pushItem', ['AUTHORIZED'], controller.pushItem);
+        this.patch('/cancel/:uuid', ['AUTHORIZED'], controller.cancel);
     };
 }

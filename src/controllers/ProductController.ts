@@ -55,8 +55,21 @@ export default class ProductController {
 
     public uploadImg = async (req: Request, res: Response) => {
         try {
-            console.log(req.file);
             return res.sendSuccess({}, req.file?.filename);
+        } catch (error: any) {
+            if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
+            if (error instanceof RuntimeError) return res.sendBadRequest(error.message);
+            return res.sendInternalServerError(error.message);
+        }
+    };
+
+    public updateStock = async (req: Request, res: Response) => {
+        try {
+            const id = parseInt(req.params.id);
+            const stock = parseInt(req.body.stock);
+            const newStock = await this.SERVICE.updateStock(id, stock);
+
+            res.sendSuccess({ stock: newStock }, 'Stock modificado correctamente.');
         } catch (error: any) {
             if (error instanceof ElementNotFoundError) return res.sendNotFound(error.message);
             if (error instanceof RuntimeError) return res.sendBadRequest(error.message);
