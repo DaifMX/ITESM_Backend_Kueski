@@ -52,13 +52,13 @@ const authMiddleware = (policies: Array<string>) => {
                 const PROPS_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000; // 24 hours
                 res.cookie('propsToken', newPropsToken, {
                         httpOnly: false,
-                        sameSite: 'lax',
+                        sameSite: 'strict',
                         secure: true,
                         expires: new Date(Date.now() + PROPS_TOKEN_EXPIRATION),
                     })
                     .cookie('accessToken', newAccessToken, {
                         httpOnly: false,
-                        sameSite: 'lax',
+                        sameSite: 'strict',
                         secure: true,
                         expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
                     });

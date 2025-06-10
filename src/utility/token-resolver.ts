@@ -18,7 +18,7 @@ export default function tokenResolver(res: Response, token: string, tokenType: T
 
     const GLOBAL_COOKIE_OPTS: CookieOptions = {
         httpOnly: false,
-        sameSite: 'lax',
+        sameSite: 'strict',
         secure: true,
     };
 
