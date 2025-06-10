@@ -114,7 +114,7 @@ export default class OrderService {
             else throw new RuntimeError('Ocurrio un error al crear tu orden en Kueski.');
 
             orderInDb!.kueskiOrderUrl = kueskiOrderUrl;
-            orderInDb!.save({ transaction });
+            await orderInDb!.save({ transaction });
 
             await transaction.commit();
 
@@ -183,7 +183,6 @@ export default class OrderService {
 
         } catch (error: any) {
             console.error(error);
-            await t.rollback();
             if (error instanceof ElementNotFoundError) throw error;
             if (error instanceof DatabaseError) throw new InternalError('Ha ocurrido un error al intentar crear tu pedidio. Intenta nuevamente más tarde.')
             throw new InternalError(error.message);
