@@ -31,7 +31,6 @@ export default class WebhookController {
 
         if (entry.status === 'canceled' || entry.status === 'denied') {
             try {
-                console.log(entry.status);
                 await this.ORDER_SERVICE.cancel(entry.order_id);
                 
             } catch (error: any) {

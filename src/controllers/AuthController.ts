@@ -12,7 +12,6 @@ export default class AuthController {
 
     public login = async (req: Request, res: Response) => {
         const { phoneNumber, password } = req.body;
-        console.log('login called');
         try {
             if (!phoneNumber || !password) throw new AuthError('Celular o contraseña no recibido/s.');
             const { accessToken, propsToken, refreshToken } = await this.SERVICE.login(phoneNumber, password);

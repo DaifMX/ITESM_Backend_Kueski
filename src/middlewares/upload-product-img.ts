@@ -13,15 +13,11 @@ if (!fs.existsSync(uploadDir)) {
 
 // Configure storage
 const storage = multer.diskStorage({
-    destination: (_req: any, file: any, cb) => {
-        console.log('test');
-        console.log(file);
+    destination: (_req: any, _file: any, cb) => {
         return cb(null, uploadDir);
     },
     filename: async (req: any, file: any, cb: any) => {
         try {
-            console.log('test');
-            console.log(file);
             if (!req.params.id) throw new RuntimeError('Nombre no recibido.');
 
             const repo = new ProductRepository();
@@ -38,11 +34,11 @@ const storage = multer.diskStorage({
 
 // File filter: only jpeg/jpg
 const fileFilter = (_req: any, file: any, cb: any) => {
-    const allowedExt = /\.(?:jpe?g|webp)$/i;
-    if (allowedExt.test(file.originalname) && /^image\/jpe?g$/.test(file.mimetype)) {
+    const allowedExt = /\.(?:webp)$/i;
+    if (allowedExt.test(file.originalname) && /^image\/webp$/.test(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Solo se permiten imágenes JPEG/JPG'), false);
+        cb(new Error('Solo se permiten imágenes tipo .webp'), false);
     }
 };
 

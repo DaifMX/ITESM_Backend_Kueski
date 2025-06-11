@@ -53,13 +53,13 @@ const authMiddleware = (policies: Array<string>) => {
                 res.cookie('propsToken', newPropsToken, {
                         httpOnly: false,
                         sameSite: 'strict',
-                        secure: true,
+                        secure: false,
                         expires: new Date(Date.now() + PROPS_TOKEN_EXPIRATION),
                     })
                     .cookie('accessToken', newAccessToken, {
                         httpOnly: false,
                         sameSite: 'strict',
-                        secure: true,
+                        secure: false,
                         expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
                     });
 
@@ -76,7 +76,6 @@ const authMiddleware = (policies: Array<string>) => {
             return next();
 
         } catch (err: any) {
-            console.log(err);
             return res.sendInternalServerError(err.message);
         }
     }
