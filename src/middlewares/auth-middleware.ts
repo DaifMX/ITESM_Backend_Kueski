@@ -53,13 +53,13 @@ const authMiddleware = (policies: Array<string>) => {
                 res.cookie('propsToken', newPropsToken, {
                         httpOnly: false,
                         sameSite: 'strict',
-                        secure: false,
+                        secure: true,
                         expires: new Date(Date.now() + PROPS_TOKEN_EXPIRATION),
                     })
                     .cookie('accessToken', newAccessToken, {
                         httpOnly: false,
                         sameSite: 'strict',
-                        secure: false,
+                        secure: true,
                         expires: new Date(Date.now() + ACCESS_TOKEN_EXPIRATION),
                     });
 
