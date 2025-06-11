@@ -223,6 +223,8 @@ export default class OrderService {
 
             if (userId && userId !== order.userId) throw new AuthError('No puedes modificar esta orden.');
 
+            if (order.status !== 'pending') throw new RuntimeError('Esta orden ya fue procesada o cancelada previamente.');
+            
             order.products.forEach(async (p: any) => {
                 const amountCommitted = p.OrderProductModel.amount;
                 p.stockCommitted = p.stockCommitted - amountCommitted;
