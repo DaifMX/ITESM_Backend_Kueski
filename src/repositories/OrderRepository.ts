@@ -34,7 +34,8 @@ export default class OrderRepository {
                     model: ProductModel,
                     through: { attributes: { exclude: ['orderId', 'productId', ...timestamps] } },
                     attributes: { exclude: [...timestamps, 'stock', 'category', 'description'] },
-                    as: 'products'
+                    as: 'products',
+                    paranoid: false
                 },
                 {
                     model: UserModel,
@@ -55,7 +56,8 @@ export default class OrderRepository {
                 model: ProductModel,
                 through: { attributes: { exclude: ['orderId', 'productId', ...timestamps] } },
                 attributes: { exclude: [...timestamps, 'stock', 'category', 'description'] },
-                as: 'products'
+                as: 'products',
+                paranoid: false,
             },
             transaction
         });
@@ -68,7 +70,8 @@ export default class OrderRepository {
                 model: ProductModel,
                 through: { attributes: ['amount', 'subtotal'] },
                 attributes: { exclude: [...timestamps] },
-                as: 'products'
+                as: 'products',
+                paranoid: false,
             },
             transaction
         });
